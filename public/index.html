@@ -79,21 +79,40 @@
         const input = document.getElementById("input")
         const messages = document.getElementById("messages")
 
-        socket.on("message", (msg) => {
-            const item = document.createElement("li")
-            item.innerText = msg;
-            messages.appendChild(item)
+        const name = prompt('What is your name?')
+        appendMessage("You Joined")
+        socket.emit('new-user', name)
+
+        // when someone send message
+        socket.on("chat-message", (data) => {
+            appendMessage(`${data.name}: ${data.message}`)
             window.scrollTo(0, document.body.scrollHeight)
         })
+
+        // when user get connected/disconnected
+        socket.on('user-connected', name => {
+            appendMessage(`${name} connected`)
+        })
+        socket.on('user-disconnected', name => {
+
+            appendMessage(`${name} disconnected`)
+        })
+
         // sendBtn.addEventListener("click", () => {
         form.addEventListener("submit", (e) => {
-            console.log("submit")
             e.preventDefault();
             if (input.value) {
-                socket.emit("chat message", input.value)
+                socket.emit("send-chat-message", input.value)
+                appendMessage(`You: ${input.value}`)
                 input.value = ""
             }
         })
+
+        function appendMessage(msg) {
+            const item = document.createElement("li")
+            item.innerText = msg;
+            messages.appendChild(item)
+        }
     </script>
 </body>
 
